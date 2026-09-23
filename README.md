@@ -2,7 +2,21 @@
 
 > 无论企业内外，只要是会议，都可以对齐。
 
+[![在线体验](https://img.shields.io/badge/在线体验-meetalign--production.up.railway.app-e8600a?style=for-the-badge)](https://meetalign-production.up.railway.app)
+
+无需安装，直接打开在线版本即可创建会议、邀请参会人填写时间并完成会议对齐：
+
+**<https://meetalign-production.up.railway.app>**
+
 MeetAlign 直译是“会议对齐”，面向企业会议时间协同：无论是公司内部跨部门会议，还是与客户、供应商、合作伙伴的跨组织会议，都可以先让所有参会人填写可用时间，再由系统完成对齐。
+
+## 界面预览
+
+| 首页 | 创建会议 + AI 语音/文字填时间 |
+| --- | --- |
+| ![首页](docs/screenshots/01-home.png) | ![创建会议与 AI 填时间](docs/screenshots/02-create.png) |
+| AI 会议方案建议 | 最终会议时间对齐 |
+| ![AI 会议方案建议](docs/screenshots/03-room-coordination.png) | ![最终会议时间对齐](docs/screenshots/04-final-result.png) |
 
 ## 核心能力
 
@@ -14,7 +28,15 @@ MeetAlign 直译是“会议对齐”，面向企业会议时间协同：无论�
 - **AI 会议建议**：结合常规工作作息，推荐 1-2 个更适合开会的方案，深夜和凌晨排在最后。
 - **成员身份与权限**：每位参会人有独立编号、颜色和访问码，换设备后也能恢复身份，避免同名误操作。
 
-## 本地运行
+## 在线体验
+
+<https://meetalign-production.up.railway.app>
+
+线上版本已经部署在 Railway，可直接通过会议链接邀请企业内外参会人。
+
+## 本地运行（仅开发）
+
+下面的 `127.0.0.1` 地址只在本地开发时使用，不是线上访问地址。
 
 ```bash
 python server.py
