@@ -2,11 +2,13 @@
 
 > 无论企业内外，只要是会议，都可以对齐。
 
-[![在线体验](https://img.shields.io/badge/在线体验-meetalign--production.up.railway.app-e8600a?style=for-the-badge)](https://meetalign-production.up.railway.app)
+[![GitHub Pages](https://img.shields.io/badge/在线体验-GitHub%20Pages-e8600a?style=for-the-badge)](https://louiselu08.github.io/meetalign/)
 
-无需安装，直接打开在线版本即可创建会议、邀请参会人填写时间并完成会议对齐：
+打开 GitHub Pages 项目站，可以查看产品介绍、真实界面并体验静态交互演示：
 
-**<https://meetalign-production.up.railway.app>**
+**<https://louiselu08.github.io/meetalign/>**
+
+交互演示：**<https://louiselu08.github.io/meetalign/demo.html>**
 
 MeetAlign 直译是“会议对齐”，面向企业会议时间协同：无论是公司内部跨部门会议，还是与客户、供应商、合作伙伴的跨组织会议，都可以先让所有参会人填写可用时间，再由系统完成对齐。
 
@@ -30,9 +32,10 @@ MeetAlign 直译是“会议对齐”，面向企业会议时间协同：无论�
 
 ## 在线体验
 
-<https://meetalign-production.up.railway.app>
+- 项目展示：[https://louiselu08.github.io/meetalign/](https://louiselu08.github.io/meetalign/)
+- 交互演示：[https://louiselu08.github.io/meetalign/demo.html](https://louiselu08.github.io/meetalign/demo.html)
 
-线上版本已经部署在 Railway，可直接通过会议链接邀请企业内外参会人。
+GitHub Pages 提供纯静态展示和单机交互演示。真正的多人跨设备会议房间需要 Python 后端服务，GitHub Pages 本身不运行后端程序。
 
 ## 本地运行（仅开发）
 

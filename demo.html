@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="会齐 MeetAlign 静态交互演示：体验 AI 解析会议空闲时间、生成方案和确认最终时间。">
+  <title>会齐 MeetAlign · 交互演示</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23e8600a'/%3E%3Cg fill='white'%3E%3Ccircle cx='32' cy='15' r='4.3'/%3E%3Crect x='26.5' y='24' width='11' height='17' rx='5.5'/%3E%3Ccircle cx='18' cy='29' r='3.4'/%3E%3Crect x='13' y='37' width='10' height='15' rx='5'/%3E%3Ccircle cx='46' cy='29' r='3.4'/%3E%3Crect x='41' y='37' width='10' height='15' rx='5'/%3E%3C/g%3E%3C/svg%3E">
+  <style>
+    :root {
+      --paper: #fffdf8;
+      --canvas: #f7f2e8;
+      --ink: #1f2933;
+      --muted: #68737d;
+      --line: #ded4c6;
+      --orange: #e8600a;
+      --orange-deep: #b94706;
+      --orange-soft: #ffe5ce;
+      --teal: #0f766e;
+      --teal-soft: #dff4ef;
+      --blue-soft: #e5eef8;
+      --danger: #a33d34;
+      --radius: 8px;
+      --shadow: 0 18px 50px rgba(78, 51, 24, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--canvas);
+      font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+      line-height: 1.6;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(255, 253, 248, 0.95);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+    }
+
+    .header-inner {
+      width: min(1100px, calc(100% - 32px));
+      min-height: 64px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-weight: 800;
+    }
+
+    .brand svg {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+    }
+
+    .back-link {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .back-link:hover {
+      color: var(--orange-deep);
+    }
+
+    .page {
+      width: min(920px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 42px 0 70px;
+    }
+
+    .intro {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--orange-deep);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 40px;
+      line-height: 1.18;
+    }
+
+    .intro p {
+      max-width: 680px;
+      margin: 12px auto 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .demo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 15px;
+      padding: 6px 10px;
+      border: 1px solid #d7ece7;
+      border-radius: 999px;
+      background: var(--teal-soft);
+      color: var(--teal);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .demo-badge::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--teal);
+    }
+
+    .stepper {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .step-pill {
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .step-pill.active {
+      border-color: var(--orange);
+      background: var(--orange-soft);
+      color: var(--orange-deep);
+    }
+
+    .panel {
+      display: none;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .panel-head h2 {
+      margin: 0 0 4px;
+      font-size: 24px;
+    }
+
+    .panel-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .chip {
+      flex: 0 0 auto;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: #2c6190;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .field input,
+    .field textarea {
+      width: 100%;
+      min-height: 43px;
+      padding: 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+    }
+
+    .field textarea {
+      min-height: 82px;
+      resize: vertical;
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(232, 96, 10, 0.13);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .btn {
+      min-height: 42px;
+      padding: 9px 17px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .btn-primary {
+      background: var(--orange);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--orange-deep);
+    }
+
+    .btn-secondary {
+      border-color: var(--line);
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--ink);
+    }
+
+    .ai-panel {
+      margin-top: 16px;
+      padding: 14px;
+      border: 1px solid #efd3b6;
+      border-radius: var(--radius);
+      background: #fff8ef;
+    }
+
+    .ai-panel.hidden {
+      display: none;
+    }
+
+    .ai-title {
+      margin: 0 0 5px;
+      color: var(--orange-deep);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .ai-note {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .slot-row {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .slot-chip {
+      padding: 6px 9px;
+      border-radius: var(--radius);
+      background: var(--blue-soft);
+      color: #2c6190;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .room-meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1px;
+      overflow: hidden;
+      margin-bottom: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--line);
+    }
+
+    .room-meta div {
+      padding: 12px;
+      background: #fff;
+    }
+
+    .room-meta span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .room-meta strong {
+      display: block;
+      margin-top: 2px;
+      font-size: 14px;
+    }
+
+    .participants {
+      border-top: 1px solid var(--line);
+    }
+
+    .participant {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .avatar {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .p1 { background: #2563eb; }
+    .p2 { background: #16a34a; }
+    .p3 { background: #ea580c; }
+    .p4 { background: #7c3aed; }
+
+    .participant strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .participant small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .participant-status {
+      margin-left: auto;
+      color: var(--teal);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .plan-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 10px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    .plan-card:hover {
+      border-color: var(--orange);
+    }
+
+    .plan-date {
+      min-width: 170px;
+    }
+
+    .plan-date span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .plan-date strong {
+      display: block;
+      font-size: 19px;
+    }
+
+    .plan-reason {
+      flex: 1;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .final {
+      padding: 20px;
+      border: 1px solid #efd3b6;
+      border-radius: var(--radius);
+      background: #fff7eb;
+      text-align: center;
+    }
+
+    .final h3 {
+      margin: 0 0 12px;
+      color: var(--orange-deep);
+      font-size: 18px;
+    }
+
+    .memo {
+      max-width: 660px;
+      margin: 0 auto;
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.6;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 30;
+      transform: translate(-50%, 16px);
+      opacity: 0;
+      pointer-events: none;
+      padding: 10px 16px;
+      border-radius: var(--radius);
+      background: var(--ink);
+      color: #fff;
+      font-size: 13px;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    @media (max-width: 680px) {
+      .page {
+        width: min(100% - 22px, 920px);
+        padding-top: 30px;
+      }
+
+      h1 {
+        font-size: 32px;
+      }
+
+      .panel {
+        padding: 17px 14px;
+      }
+
+      .panel-head {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .form-grid,
+      .room-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .plan-card {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .plan-date {
+        min-width: 0;
+      }
+
+      .memo {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a class="brand" href="index.html" aria-label="返回 MeetAlign 首页">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="12" fill="#e8600a"/>
+          <g fill="#ffffff">
+            <circle cx="32" cy="15" r="4.3"/>
+            <rect x="26.5" y="24" width="11" height="17" rx="5.5"/>
+            <circle cx="18" cy="29" r="3.4"/>
+            <rect x="13" y="37" width="10" height="15" rx="5"/>
+            <circle cx="46" cy="29" r="3.4"/>
+            <rect x="41" y="37" width="10" height="15" rx="5"/>
+          </g>
+        </svg>
+        <span>会齐 MeetAlign</span>
+      </a>
+      <a class="back-link" href="index.html">返回项目首页</a>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="intro">
+      <p class="eyebrow">INTERACTIVE PRODUCT DEMO</p>
+      <h1>体验一场会议如何完成时间对齐</h1>
+      <p>从 AI 理解空闲时间，到生成会议方案，再到确认最终时间。下面是无需后端的交互演示。</p>
+      <div class="demo-badge">静态演示模式，不会创建真实会议</div>
+    </div>
+
+    <div class="stepper" aria-label="演示步骤">
+      <div class="step-pill active" data-step-label="1">01 创建会议</div>
+      <div class="step-pill" data-step-label="2">02 全员填写</div>
+      <div class="step-pill" data-step-label="3">03 确认时间</div>
+    </div>
+
+    <section class="panel active" data-panel="1">
+      <div class="panel-head">
+        <div>
+          <h2>发起一场跨组织会议</h2>
+          <p>填写会议信息，再用一句自然语言告诉 AI 你的空闲安排。</p>
+        </div>
+        <span class="chip">第 1 步</span>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="topic">会议主题</label>
+          <input id="topic" value="Q3 项目对齐会">
+        </div>
+        <div class="field">
+          <label for="nickname">我的昵称</label>
+          <input id="nickname" value="阿力">
+        </div>
+        <div class="field full">
+          <label for="ai-text">用语音或文字描述空闲时间</label>
+          <textarea id="ai-text">周四周五下午都有空，周三下午有客户会，其他时间需要确认</textarea>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" id="parse-ai" type="button">AI 解析空闲时间</button>
+      </div>
+      <div class="ai-panel hidden" id="ai-result">
+        <p class="ai-title">AI 解析结果</p>
+        <p class="ai-note">AI 理解：周四、周五下午 14:00-18:00 可参会，周三客户会已排除。</p>
+        <div class="slot-row">
+          <span class="slot-chip">周四 14:00-18:00</span>
+          <span class="slot-chip">周五 14:00-18:00</span>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" id="confirm-ai" type="button">确认并继续</button>
+          <button class="btn btn-secondary" id="reset-ai" type="button">重新描述</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="2">
+      <div class="panel-head">
+        <div>
+          <h2>邀请所有参会人对齐时间</h2>
+          <p>无论同事、客户还是供应商，都通过同一个会议入口填写。</p>
+        </div>
+        <span class="chip">第 2 步</span>
+      </div>
+      <div class="room-meta">
+        <div><span>会议主题</span><strong>Q3 项目对齐会</strong></div>
+        <div><span>参会人数</span><strong>4 人</strong></div>
+        <div><span>填写状态</span><strong>4 / 4 已填写</strong></div>
+      </div>
+      <div class="participants">
+        <div class="participant">
+          <span class="avatar p1">阿</span>
+          <div><strong>阿力 · #1</strong><small>周四、周五 14:00-18:00</small></div>
+          <span class="participant-status">已填写</span>
+        </div>
+        <div class="participant">
+          <span class="avatar p2">满</span>
+          <div><strong>小满 · #2</strong><small>周四、周五 13:00-17:00</small></div>
+          <span class="participant-status">已填写</span>
+        </div>
+        <div class="participant">
+          <span class="avatar p3">杰</span>
+          <div><strong>阿杰 · #3</strong><small>周四、周五 14:00-18:00</small></div>
+          <span class="participant-status">已填写</span>
+        </div>
+        <div class="participant">
+          <span class="avatar p4">林</span>
+          <div><strong>小林 · #4</strong><small>周四、周五 14:00-16:30</small></div>
+          <span class="participant-status">已填写</span>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" id="generate-plans" type="button">生成 AI 会议方案</button>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="3">
+      <div class="panel-head">
+        <div>
+          <h2>选择一个最终会议时间</h2>
+          <p>AI 优先推荐工作日下午，深夜和凌晨会自动排到最后。</p>
+        </div>
+        <span class="chip">第 3 步</span>
+      </div>
+      <button class="plan-card" type="button" data-date="9月24日 周四" data-time="14:00 - 16:30">
+        <div class="plan-date"><span>方案一</span><strong>14:00 - 16:30</strong></div>
+        <div class="plan-reason">9月24日周四下午，所有参会人均可参加，处于正常工作时段。</div>
+        <span class="chip">推荐</span>
+      </button>
+      <button class="plan-card" type="button" data-date="9月25日 周五" data-time="14:00 - 16:30">
+        <div class="plan-date"><span>方案二</span><strong>14:00 - 16:30</strong></div>
+        <div class="plan-reason">9月25日周五下午，全员可参加，适合作为最终确认前的备选。</div>
+        <span class="chip">备选</span>
+      </button>
+      <div class="final hidden" id="final-result">
+        <h3>会议时间已对齐</h3>
+        <p class="memo" id="memo"></p>
+        <div class="actions" style="justify-content:center">
+          <button class="btn btn-primary" id="copy-memo" type="button">复制会议备忘</button>
+          <a class="btn btn-secondary" href="demo.html">重新体验</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast">已复制会议备忘</div>
+
+  <script>
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const labels = [...document.querySelectorAll("[data-step-label]")];
+    const aiResult = document.getElementById("ai-result");
+    const finalResult = document.getElementById("final-result");
+    const toast = document.getElementById("toast");
+
+    function showPanel(step) {
+      panels.forEach((panel) => panel.classList.toggle("active", panel.dataset.panel === String(step)));
+      labels.forEach((label) => label.classList.toggle("active", label.dataset.stepLabel === String(step)));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    document.getElementById("parse-ai").addEventListener("click", () => {
+      aiResult.classList.remove("hidden");
+      aiResult.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+
+    document.getElementById("reset-ai").addEventListener("click", () => {
+      aiResult.classList.add("hidden");
+      document.getElementById("ai-text").focus();
+    });
+
+    document.getElementById("confirm-ai").addEventListener("click", () => showPanel(2));
+    document.getElementById("generate-plans").addEventListener("click", () => showPanel(3));
+
+    document.querySelectorAll(".plan-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        const memo = `【会齐 MeetAlign】Q3 项目对齐会：我们四个 ${card.dataset.date} ${card.dataset.time} 开会吧！`;
+        document.getElementById("memo").textContent = memo;
+        finalResult.classList.remove("hidden");
+        finalResult.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    });
+
+    document.getElementById("copy-memo").addEventListener("click", async () => {
+      const text = document.getElementById("memo").textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (_) {
+        const area = document.createElement("textarea");
+        area.value = text;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        area.remove();
+      }
+      toast.classList.add("show");
+      window.setTimeout(() => toast.classList.remove("show"), 1800);
+    });
+  </script>
+</body>
+</html>

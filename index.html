@@ -1,0 +1,1041 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="会齐 MeetAlign，面向企业内外会议的时间对齐工具。用语音或文字填写空闲时间，AI 自动解析、推荐方案并帮助完成协调。">
+  <meta name="theme-color" content="#e8600a">
+  <title>会齐 MeetAlign · 企业会议时间对齐</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23e8600a'/%3E%3Cg fill='white'%3E%3Ccircle cx='32' cy='15' r='4.3'/%3E%3Crect x='26.5' y='24' width='11' height='17' rx='5.5'/%3E%3Ccircle cx='18' cy='29' r='3.4'/%3E%3Crect x='13' y='37' width='10' height='15' rx='5'/%3E%3Ccircle cx='46' cy='29' r='3.4'/%3E%3Crect x='41' y='37' width='10' height='15' rx='5'/%3E%3C/g%3E%3C/svg%3E">
+  <style>
+    :root {
+      --paper: #fffdf8;
+      --canvas: #f7f2e8;
+      --ink: #1f2933;
+      --muted: #65717c;
+      --line: #ded4c6;
+      --orange: #e8600a;
+      --orange-deep: #b94706;
+      --orange-soft: #ffe5ce;
+      --teal: #0f766e;
+      --teal-soft: #dff4ef;
+      --blue-soft: #e5eef8;
+      --shadow: 0 20px 60px rgba(78, 51, 24, 0.13);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+      line-height: 1.65;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(255, 253, 248, 0.94);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+    }
+
+    .header-inner {
+      width: min(1180px, calc(100% - 40px));
+      min-height: 70px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      box-shadow: 0 6px 18px rgba(232, 96, 10, 0.22);
+    }
+
+    .brand-name {
+      font-size: 18px;
+    }
+
+    .brand-name small {
+      margin-left: 4px;
+      color: var(--orange-deep);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .nav a {
+      padding: 7px 0;
+    }
+
+    .nav a:hover {
+      color: var(--orange-deep);
+    }
+
+    .header-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      background: var(--ink);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .header-cta:hover {
+      background: #101820;
+    }
+
+    .hero {
+      background: #fff7ea;
+      border-bottom: 1px solid var(--line);
+      overflow: hidden;
+    }
+
+    .hero-copy {
+      width: min(920px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 82px 0 46px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 18px;
+      color: var(--orange-deep);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      background: var(--orange);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 68px;
+      line-height: 1.05;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    h1 span {
+      display: inline-block;
+      color: var(--orange-deep);
+    }
+
+    .hero-tagline {
+      margin: 18px 0 0;
+      font-size: 24px;
+      font-weight: 800;
+      color: #493a2d;
+    }
+
+    .hero-description {
+      max-width: 720px;
+      margin: 14px auto 0;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 48px;
+      padding: 11px 22px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      font-weight: 800;
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: var(--orange);
+      color: #fff;
+      box-shadow: 0 10px 26px rgba(232, 96, 10, 0.24);
+    }
+
+    .btn-primary:hover {
+      background: var(--orange-deep);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      border-color: var(--line);
+      color: var(--ink);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--ink);
+    }
+
+    .hero-facts {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 26px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .hero-facts li {
+      padding: 6px 11px;
+      border: 1px solid #efd6bc;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      color: #745b46;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .hero-shot-wrap {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto -128px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-shot-frame {
+      overflow: hidden;
+      border: 1px solid #d8c5af;
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .browser-bar {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      height: 38px;
+      padding: 0 14px;
+      background: #f2ece3;
+      border-bottom: 1px solid #ded4c6;
+    }
+
+    .browser-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #c9bba9;
+    }
+
+    .browser-address {
+      flex: 1;
+      max-width: 440px;
+      margin-left: 8px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: #fff;
+      color: #7c6a57;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .hero-shot {
+      width: 100%;
+      max-height: 760px;
+      object-fit: cover;
+      object-position: top;
+      cursor: zoom-in;
+    }
+
+    .hero-spacer {
+      height: 150px;
+      background: var(--paper);
+    }
+
+    .section {
+      padding: 88px 0;
+    }
+
+    .section-inner {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .section-head {
+      max-width: 760px;
+      margin-bottom: 34px;
+    }
+
+    .section-head.center {
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+
+    .section-kicker {
+      margin: 0 0 10px;
+      color: var(--teal);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 38px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .section-lead {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .value-band {
+      background: var(--canvas);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .value-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 28px;
+    }
+
+    .value-item {
+      padding-top: 22px;
+      border-top: 3px solid var(--orange);
+    }
+
+    .value-number {
+      display: block;
+      margin-bottom: 18px;
+      color: var(--orange-deep);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .value-item h3 {
+      margin: 0 0 8px;
+      font-size: 21px;
+    }
+
+    .value-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .feature {
+      min-height: 208px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    .feature-icon {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      background: var(--orange-soft);
+      color: var(--orange-deep);
+    }
+
+    .feature:nth-child(2n) .feature-icon {
+      background: var(--teal-soft);
+      color: var(--teal);
+    }
+
+    .feature:nth-child(3n) .feature-icon {
+      background: var(--blue-soft);
+      color: #295d91;
+    }
+
+    .feature svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .feature h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .feature p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .gallery-band {
+      background: #14232b;
+      color: #f8f5ef;
+    }
+
+    .gallery-band .section-kicker {
+      color: #65d2c6;
+    }
+
+    .gallery-band .section-lead {
+      color: #b7c3c8;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .gallery-card {
+      overflow: hidden;
+      border: 1px solid #354953;
+      border-radius: var(--radius);
+      background: #1c3039;
+    }
+
+    .gallery-card img {
+      width: 100%;
+      height: 330px;
+      object-fit: cover;
+      object-position: top;
+      cursor: zoom-in;
+      transition: transform 0.25s ease;
+    }
+
+    .gallery-card:hover img {
+      transform: scale(1.012);
+    }
+
+    .gallery-caption {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 15px 17px;
+      border-top: 1px solid #354953;
+    }
+
+    .gallery-caption strong {
+      font-size: 15px;
+    }
+
+    .gallery-caption span {
+      color: #94a6ad;
+      font-size: 12px;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px;
+      counter-reset: step;
+    }
+
+    .step {
+      position: relative;
+      padding: 26px 24px 24px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    .step::before {
+      counter-increment: step;
+      content: "0" counter(step);
+      display: block;
+      margin-bottom: 24px;
+      color: var(--orange-deep);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .step h3 {
+      margin: 0 0 8px;
+      font-size: 19px;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .cta-band {
+      padding: 72px 0;
+      background: #fff2df;
+      border-top: 1px solid #efd7ba;
+      border-bottom: 1px solid #efd7ba;
+    }
+
+    .cta-inner {
+      width: min(920px, calc(100% - 40px));
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .cta-inner h2 {
+      font-size: 42px;
+    }
+
+    .cta-inner p {
+      margin: 12px auto 0;
+      color: var(--muted);
+    }
+
+    .footer {
+      padding: 34px 0 42px;
+      background: #fffdf8;
+    }
+
+    .footer-inner {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 18px;
+    }
+
+    .footer-links a:hover {
+      color: var(--orange-deep);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    dialog.lightbox {
+      width: min(1180px, calc(100vw - 36px));
+      max-height: calc(100vh - 36px);
+      padding: 0;
+      border: 0;
+      border-radius: var(--radius);
+      background: #0f171c;
+      box-shadow: 0 24px 90px rgba(0, 0, 0, 0.45);
+    }
+
+    dialog.lightbox::backdrop {
+      background: rgba(10, 15, 18, 0.82);
+    }
+
+    .lightbox img {
+      width: 100%;
+      max-height: calc(100vh - 76px);
+      object-fit: contain;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 38px;
+      height: 38px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(15, 23, 28, 0.82);
+      color: #fff;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .nav {
+        display: none;
+      }
+
+      h1 {
+        font-size: 54px;
+      }
+
+      .hero-tagline {
+        font-size: 21px;
+      }
+
+      .feature-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .value-grid,
+      .steps {
+        grid-template-columns: 1fr;
+      }
+
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-shot-wrap {
+        margin-bottom: -64px;
+      }
+
+      .hero-spacer {
+        height: 90px;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .header-inner {
+        width: min(100% - 24px, 1180px);
+        min-height: 61px;
+      }
+
+      .brand-name small {
+        display: none;
+      }
+
+      .header-cta {
+        min-height: 36px;
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+
+      .hero-copy {
+        width: min(100% - 28px, 920px);
+        padding: 58px 0 34px;
+      }
+
+      .eyebrow {
+        margin-bottom: 14px;
+        font-size: 12px;
+      }
+
+      h1 {
+        font-size: 46px;
+      }
+
+      h1 span {
+        display: block;
+        margin-top: 4px;
+        font-size: 31px;
+      }
+
+      .hero-tagline {
+        font-size: 18px;
+      }
+
+      .hero-description {
+        font-size: 15px;
+      }
+
+      .hero-actions {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .hero-shot-wrap,
+      .section-inner,
+      .footer-inner {
+        width: min(100% - 24px, 1180px);
+      }
+
+      .browser-address {
+        font-size: 9px;
+      }
+
+      .section {
+        padding: 64px 0;
+      }
+
+      h2,
+      .cta-inner h2 {
+        font-size: 30px;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .feature {
+        min-height: auto;
+      }
+
+      .gallery-card img {
+        height: 230px;
+      }
+
+      .gallery-caption {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .cta-inner {
+        width: min(100% - 28px, 920px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      .btn,
+      .gallery-card img,
+      .reveal {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#top" aria-label="会齐 MeetAlign 首页">
+        <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="12" fill="#e8600a"/>
+          <g fill="#ffffff">
+            <circle cx="32" cy="15" r="4.3"/>
+            <rect x="26.5" y="24" width="11" height="17" rx="5.5"/>
+            <circle cx="18" cy="29" r="3.4"/>
+            <rect x="13" y="37" width="10" height="15" rx="5"/>
+            <circle cx="46" cy="29" r="3.4"/>
+            <rect x="41" y="37" width="10" height="15" rx="5"/>
+          </g>
+        </svg>
+        <span class="brand-name">会齐 <small>MeetAlign</small></span>
+      </a>
+      <nav class="nav" aria-label="主要导航">
+        <a href="#why">为什么</a>
+        <a href="#features">功能</a>
+        <a href="#preview">界面</a>
+        <a href="#workflow">流程</a>
+        <a href="https://github.com/LouiseLU08/meetalign" target="_blank" rel="noreferrer">GitHub</a>
+      </nav>
+      <a class="header-cta" href="demo.html">体验演示</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Enterprise Meeting Alignment</p>
+        <h1>会齐 <span>MeetAlign</span></h1>
+        <p class="hero-tagline">时间精准对齐・打通内外会议</p>
+        <p class="hero-description">
+          让内部团队、客户、供应商和合作伙伴先对齐时间，再进入会议。语音或文字说出安排，AI 自动解析空闲时间，并在没有共同空档时继续推动协调。
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="demo.html">
+            体验交互演示
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6"/>
+            </svg>
+          </a>
+          <a class="btn btn-secondary" href="https://github.com/LouiseLU08/meetalign" target="_blank" rel="noreferrer">
+            查看 GitHub 项目
+          </a>
+        </div>
+        <ul class="hero-facts" aria-label="产品特点">
+          <li>跨部门会议</li>
+          <li>客户与供应商</li>
+          <li>AI 语音填时间</li>
+          <li>无需注册</li>
+        </ul>
+      </div>
+      <div class="hero-shot-wrap reveal">
+        <div class="hero-shot-frame">
+          <div class="browser-bar" aria-hidden="true">
+            <span class="browser-dot"></span>
+            <span class="browser-dot"></span>
+            <span class="browser-dot"></span>
+            <span class="browser-address">louiselu08.github.io/meetalign</span>
+          </div>
+          <img class="hero-shot" src="docs/screenshots/02-create.png" alt="MeetAlign 创建会议并让 AI 解析空闲时间" data-lightbox>
+        </div>
+      </div>
+    </section>
+
+    <div class="hero-spacer" aria-hidden="true"></div>
+
+    <section class="section value-band" id="why">
+      <div class="section-inner">
+        <div class="section-head reveal">
+          <p class="section-kicker">WHY MEETALIGN</p>
+          <h2>会议时间不该靠反复私聊</h2>
+          <p class="section-lead">当会议跨越部门、公司或组织边界，最耗时的往往不是开会，而是会前逐个确认时间。</p>
+        </div>
+        <div class="value-grid">
+          <article class="value-item reveal">
+            <span class="value-number">01 / 跨组织</span>
+            <h3>企业内外都能参与</h3>
+            <p>无需同一套企业通讯录。通过会议链接或会议码，内部同事与外部伙伴都能加入同一场时间对齐。</p>
+          </article>
+          <article class="value-item reveal">
+            <span class="value-number">02 / 闭环协调</span>
+            <h3>没有共同空档也能推进</h3>
+            <p>系统优先给出最多人参会的时段，明确差谁、谁需要调整，并把“没空档”继续谈成“有空档”。</p>
+          </article>
+          <article class="value-item reveal">
+            <span class="value-number">03 / AI 参与</span>
+            <h3>说一句就能填时间</h3>
+            <p>用语音或文字描述安排，AI 解析成 30 分钟粒度的可用时间。确认后自动勾选，也能继续手动修改。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="section-inner">
+        <div class="section-head center reveal">
+          <p class="section-kicker">CORE FEATURES</p>
+          <h2>从“找空档”到“确定会议”</h2>
+          <p class="section-lead">保留简单直观的日历操作，同时让 AI 和自动协调承担重复沟通。</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature reveal">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg>
+            </div>
+            <h3>语音理解空闲时间</h3>
+            <p>直接说“周四下午有客户会，其他时间可以”，AI 自动理解安排并转换为可确认的时间段。</p>
+          </article>
+          <article class="feature reveal">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="m9 15 2 2 4-4"/></svg>
+            </div>
+            <h3>30 分钟粒度日历</h3>
+            <p>按天查看明确的时间格，支持上午、下午、晚上、整天、工作日和周末快捷选择。</p>
+          </article>
+          <article class="feature reveal">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M3 20v-2a5 5 0 0 1 10 0v2M11 20v-2a5 5 0 0 1 10 0v2"/></svg>
+            </div>
+            <h3>自动计算共同时间</h3>
+            <p>所有参会人提交后自动计算重合时段，不需要发起人对着多份日程手动比对。</p>
+          </article>
+          <article class="feature reveal">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5M4 19h16"/><path d="m7 15 4-4 3 3 5-7"/></svg>
+            </div>
+            <h3>AI 会议方案建议</h3>
+            <p>结合常规工作作息推荐 1-2 个最合适的方案，深夜和凌晨自动排到最后。</p>
+          </article>
+          <article class="feature reveal">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/><path d="M12 7v5l3 2"/></svg>
+            </div>
+            <h3>没有重合时继续协调</h3>
+            <p>按参会人数从多到少给出备选，只让缺席者回答能否调整，避免所有人重复沟通。</p>
+          </article>
+          <article class="feature reveal">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg>
+            </div>
+            <h3>成员身份与访问码</h3>
+            <p>每位参会人拥有独立编号、颜色和访问码，换设备能恢复身份，避免同昵称误操作。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section gallery-band" id="preview">
+      <div class="section-inner">
+        <div class="section-head reveal">
+          <p class="section-kicker">PRODUCT PREVIEW</p>
+          <h2>真实界面，从创建到约成</h2>
+          <p class="section-lead">点击任意界面图可以放大查看。</p>
+        </div>
+        <div class="gallery-grid">
+          <article class="gallery-card reveal">
+            <img src="docs/screenshots/01-home.png" alt="MeetAlign 首页" loading="lazy" data-lightbox>
+            <div class="gallery-caption">
+              <strong>清晰的会议入口</strong>
+              <span>创建会议 / 会议码加入</span>
+            </div>
+          </article>
+          <article class="gallery-card reveal">
+            <img src="docs/screenshots/02-create.png" alt="MeetAlign 创建会议与 AI 填时间" loading="lazy" data-lightbox>
+            <div class="gallery-caption">
+              <strong>AI 语音与文字填时间</strong>
+              <span>预览确认 / 手动修改</span>
+            </div>
+          </article>
+          <article class="gallery-card reveal">
+            <img src="docs/screenshots/03-room-coordination.png" alt="MeetAlign AI 会议方案与成员协调" loading="lazy" data-lightbox>
+            <div class="gallery-caption">
+              <strong>AI 方案建议</strong>
+              <span>推荐时间 / 明确差谁</span>
+            </div>
+          </article>
+          <article class="gallery-card reveal">
+            <img src="docs/screenshots/04-final-result.png" alt="MeetAlign 最终会议时间对齐结果" loading="lazy" data-lightbox>
+            <div class="gallery-caption">
+              <strong>最终会议时间</strong>
+              <span>复制备忘 / 继续再约</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="workflow">
+      <div class="section-inner">
+        <div class="section-head center reveal">
+          <p class="section-kicker">HOW IT WORKS</p>
+          <h2>三步完成一场会议对齐</h2>
+        </div>
+        <div class="steps">
+          <article class="step reveal">
+            <h3>发起会议</h3>
+            <p>填写会议主题、参会人数和截止时间，用语音或日历完成自己的空闲时间。</p>
+          </article>
+          <article class="step reveal">
+            <h3>邀请参会人</h3>
+            <p>分享会议链接或会议码。内部同事、客户和外部伙伴分别填写自己的可用时间。</p>
+          </article>
+          <article class="step reveal">
+            <h3>确认最终时间</h3>
+            <p>查看共同时段和 AI 建议，一键确定并复制会议备忘；没有共同空档也可以继续协调。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-band">
+      <div class="cta-inner reveal">
+        <h2>下一场会议，先把时间对齐</h2>
+        <p>打开即可使用，不需要安装。邀请企业内外参会人一起完成会议时间协同。</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="demo.html">打开交互演示</a>
+          <a class="btn btn-secondary" href="https://github.com/LouiseLU08/meetalign" target="_blank" rel="noreferrer">前往 GitHub</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <span>会齐 MeetAlign · 让每一场内外会议，时间对齐更高效</span>
+      <div class="footer-links">
+        <a href="demo.html">交互演示</a>
+        <a href="https://github.com/LouiseLU08/meetalign" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="https://github.com/LouiseLU08/meetalign#readme" target="_blank" rel="noreferrer">文档</a>
+      </div>
+    </div>
+  </footer>
+
+  <dialog class="lightbox" id="lightbox">
+    <button class="lightbox-close" type="button" aria-label="关闭图片">×</button>
+    <img id="lightbox-image" alt="MeetAlign 界面大图">
+  </dialog>
+
+  <script>
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImage = document.getElementById("lightbox-image");
+    document.querySelectorAll("[data-lightbox]").forEach((image) => {
+      image.addEventListener("click", () => {
+        lightboxImage.src = image.src;
+        lightboxImage.alt = image.alt;
+        lightbox.showModal();
+      });
+    });
+    lightbox.querySelector(".lightbox-close").addEventListener("click", () => lightbox.close());
+    lightbox.addEventListener("click", (event) => {
+      if (event.target === lightbox) lightbox.close();
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll(".reveal").forEach((element) => observer.observe(element));
+  </script>
+</body>
+</html>
